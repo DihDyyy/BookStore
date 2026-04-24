@@ -1,0 +1,52 @@
+@model List<User>
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h4 class="fw-bold mb-4">Quản lý người dùng</h4>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>#</th><th>Họ tên</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th>Ngày tạo</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.Id</td>
+                        <td class="fw-semibold">@user.Name</td>
+                        <td>@user.Email</td>
+                        <td><span class="badge @(user.Role == "Admin" ? "bg-danger" : "bg-primary")">@user.Role</span></td>
+                        <td>
+                            @if (user.IsLocked)
+                            {
+                                <span class="badge bg-danger"><i class="fas fa-lock me-1"></i>Đã khóa</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success"><i class="fas fa-check me-1"></i>Hoạt động</span>
+                            }
+                        </td>
+                        <td>@user.CreatedAt.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @if (user.Role != "Admin")
+                            {
+                                <form action="/Admin/User/ToggleLock/@user.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm @(user.IsLocked ? "btn-outline-success" : "btn-outline-danger")"
+                                            onclick="return confirm('@(user.IsLocked ? "Mở khóa" : "Khóa") tài khoản này?')">
+                                        <i class="fas @(user.IsLocked ? "fa-unlock" : "fa-lock")"></i>
+                                        @(user.IsLocked ? "Mở khóa" : "Khóa")
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,80 @@
+@model Order
+@{
+    ViewData["Title"] = $"Chi tiết đơn hàng #{Model.Id}";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<a href="/Admin/Order" class="btn btn-outline-secondary mb-3"><i class="fas fa-arrow-left me-1"></i>Quay lại</a>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Đơn hàng #@Model.Id</h5>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Người nhận:</strong> @Model.FullName</p>
+                        <p><strong>SĐT:</strong> @Model.Phone</p>
+                        <p><strong>Địa chỉ:</strong> @Model.Address</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Khách hàng:</strong> @Model.User?.Name (@Model.User?.Email)</p>
+                        <p><strong>Ngày đặt:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                        @if (!string.IsNullOrEmpty(Model.Note))
+                        {
+                            <p><strong>Ghi chú:</strong> @Model.Note</p>
+                        }
+                    </div>
+                </div>
+
+                <table class="table">
+                    <thead class="table-light">
+                        <tr><th>Sách</th><th class="text-center">SL</th><th class="text-end">Đơn giá</th><th class="text-end">Thành tiền</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderDetails!)
+                        {
+                            <tr>
+                                <td>@item.Book?.Title</td>
+                                <td class="text-center">@item.Quantity</td>
+                                <td class="text-end">@item.Price.ToString("N0")₫</td>
+                                <td class="text-end fw-bold">@((item.Price * item.Quantity).ToString("N0"))₫</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold"><td colspan="3">Tổng cộng:</td><td class="text-end text-danger h5">@Model.TotalPrice.ToString("N0")₫</td></tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Cập nhật trạng thái</h5>
+                @{
+                    var badgeClass = Model.Status switch { "Chờ xử lý" => "bg-warning", "Đang giao" => "bg-info", "Đã giao" => "bg-success", "Đã hủy" => "bg-danger", _ => "bg-secondary" };
+                }
+                <p>Trạng thái hiện tại: <span class="badge @badgeClass fs-6">@Model.Status</span></p>
+
+                <form action="/Admin/Order/UpdateStatus/@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <select name="status" class="form-select">
+                            <option value="Chờ xử lý" selected="@(Model.Status == "Chờ xử lý")">Chờ xử lý</option>
+                            <option value="Đang giao" selected="@(Model.Status == "Đang giao")">Đang giao</option>
+                            <option value="Đã giao" selected="@(Model.Status == "Đã giao")">Đã giao</option>
+                            <option value="Đã hủy" selected="@(Model.Status == "Đã hủy")">Đã hủy</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Bạn có chắc muốn cập nhật trạng thái?')">
+                        <i class="fas fa-save me-2"></i>Cập nhật
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

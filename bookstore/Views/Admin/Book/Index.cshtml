@@ -1,0 +1,72 @@
+@model List<Book>
+@{
+    ViewData["Title"] = "Quản lý sách";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Quản lý sách</h4>
+    <a href="/Admin/Book/Create" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Thêm sách</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Ảnh</th>
+                    <th>Tên sách</th>
+                    <th>Tác giả</th>
+                    <th>Danh mục</th>
+                    <th>Giá</th>
+                    <th>Tồn kho</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var book in Model)
+                {
+                    <tr>
+                        <td>@book.Id</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(book.Image))
+                            {
+                                <img src="~/images/books/@book.Image" width="50" height="65" class="rounded" style="object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:50px;height:65px;"><i class="fas fa-image text-muted"></i></div>
+                            }
+                        </td>
+                        <td class="fw-semibold">@book.Title</td>
+                        <td>@book.Author?.Name</td>
+                        <td><span class="badge bg-primary">@book.Category?.Name</span></td>
+                        <td class="text-danger fw-bold">@book.Price.ToString("N0")₫</td>
+                        <td>
+                            @if (book.Stock > 10)
+                            {
+                                <span class="badge bg-success">@book.Stock</span>
+                            }
+                            else if (book.Stock > 0)
+                            {
+                                <span class="badge bg-warning">@book.Stock</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">0</span>
+                            }
+                        </td>
+                        <td>
+                            <a href="/Admin/Book/Edit/@book.Id" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></a>
+                            <form action="/Admin/Book/Delete/@book.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa sách này?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,203 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 opacity-75">Tổng sách</h6>
+                        <h3 class="fw-bold mb-0">@Model.TotalBooks</h3>
+                    </div>
+                    <i class="fas fa-book fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 opacity-75">Đơn hàng</h6>
+                        <h3 class="fw-bold mb-0">@Model.TotalOrders</h3>
+                    </div>
+                    <i class="fas fa-shopping-bag fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 opacity-75">Doanh thu</h6>
+                        <h3 class="fw-bold mb-0">@Model.TotalRevenue.ToString("N0")₫</h3>
+                    </div>
+                    <i class="fas fa-dollar-sign fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 opacity-75">Người dùng</h6>
+                        <h3 class="fw-bold mb-0">@Model.TotalUsers</h3>
+                    </div>
+                    <i class="fas fa-users fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center">
+                <div class="bg-warning bg-opacity-10 p-3 rounded me-3">
+                    <i class="fas fa-clock fa-2x text-warning"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">Đơn chờ xử lý</h6>
+                    <h4 class="fw-bold mb-0">@Model.PendingOrders</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center">
+                <div class="bg-success bg-opacity-10 p-3 rounded me-3">
+                    <i class="fas fa-calendar-day fa-2x text-success"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">Đơn hàng hôm nay</h6>
+                    <h4 class="fw-bold mb-0">@Model.TodayOrders</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Revenue Chart -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3"><i class="fas fa-chart-bar me-2"></i>Biểu đồ doanh thu</h5>
+                <canvas id="revenueChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Books -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3"><i class="fas fa-fire me-2 text-danger"></i>Sách bán chạy</h5>
+                @if (Model.TopBooks.Any())
+                {
+                    @foreach (var book in Model.TopBooks)
+                    {
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <div>
+                                <strong>@book.Title</strong>
+                                <br /><small class="text-muted">Đã bán: @book.TotalSold</small>
+                            </div>
+                            <span class="badge bg-success">@book.Revenue.ToString("N0")₫</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted text-center">Chưa có dữ liệu</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="fas fa-clock me-2"></i>Đơn hàng gần đây</h5>
+            <a href="/Admin/Order" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr><th>#</th><th>Khách hàng</th><th>Tổng tiền</th><th>Trạng thái</th><th>Ngày đặt</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        var cls = order.Status switch { "Chờ xử lý" => "bg-warning", "Đang giao" => "bg-info", "Đã giao" => "bg-success", "Đã hủy" => "bg-danger", _ => "bg-secondary" };
+                        <tr>
+                            <td>@order.Id</td>
+                            <td>@order.User?.Name</td>
+                            <td class="text-danger fw-bold">@order.TotalPrice.ToString("N0")₫</td>
+                            <td><span class="badge @cls">@order.Status</span></td>
+                            <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Revenue Chart
+        fetch('/Admin/GetRevenueData')
+            .then(r => r.json())
+            .then(data => {
+                const ctx = document.getElementById('revenueChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(d => d.month),
+                        datasets: [{
+                            label: 'Doanh thu (VNĐ)',
+                            data: data.map(d => d.revenue),
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString('vi-VN') + '₫';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(() => {
+                document.getElementById('revenueChart').parentElement.innerHTML += '<p class="text-muted text-center">Chưa có dữ liệu doanh thu</p>';
+            });
+    </script>
+}

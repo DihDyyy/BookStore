@@ -1,0 +1,37 @@
+@model List<Category>
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Quản lý danh mục</h4>
+    <a href="/Admin/Category/Create" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Thêm danh mục</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>#</th><th>Tên danh mục</th><th>Số sách</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var cat in Model)
+                {
+                    <tr>
+                        <td>@cat.Id</td>
+                        <td class="fw-semibold">@cat.Name</td>
+                        <td><span class="badge bg-info">@(cat.Books?.Count ?? 0)</span></td>
+                        <td>
+                            <a href="/Admin/Category/Edit/@cat.Id" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></a>
+                            <form action="/Admin/Category/Delete/@cat.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

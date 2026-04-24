@@ -1,0 +1,94 @@
+@model Book
+@{
+    ViewData["Title"] = "Sửa sách";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<a href="/Admin/Book" class="btn btn-outline-secondary mb-3"><i class="fas fa-arrow-left me-1"></i>Quay lại</a>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+        <h4 class="fw-bold mb-4">Sửa sách: @Model.Title</h4>
+
+        <form action="/Admin/Book/Edit/@Model.Id" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label"></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Price" class="form-label"></label>
+                            <input asp-for="Price" class="form-control" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Stock" class="form-label"></label>
+                            <input asp-for="Stock" class="form-control" />
+                            <span asp-validation-for="Stock" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-4">
+                            <label asp-for="CategoryId" class="form-label"></label>
+                            <select asp-for="CategoryId" asp-items="@ViewBag.Categories" class="form-select"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="AuthorId" class="form-label"></label>
+                            <select asp-for="AuthorId" asp-items="@ViewBag.Authors" class="form-select"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="PublisherId" class="form-label"></label>
+                            <select asp-for="PublisherId" asp-items="@ViewBag.Publishers" class="form-select"></select>
+                        </div>
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <label asp-for="PublicationYear" class="form-label"></label>
+                        <input asp-for="PublicationYear" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Ảnh bìa (để trống nếu không đổi)</label>
+                    <input type="file" name="imageFile" class="form-control" accept="image/*" onchange="previewImage(this)" />
+                    <div class="mt-3 text-center">
+                        @if (!string.IsNullOrEmpty(Model.Image))
+                        {
+                            <img id="imagePreview" src="~/images/books/@Model.Image" class="img-fluid rounded shadow" style="max-height: 300px;" />
+                        }
+                        else
+                        {
+                            <img id="imagePreview" src="#" class="img-fluid rounded shadow d-none" style="max-height: 300px;" />
+                        }
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Cập nhật</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function previewImage(input) {
+            var preview = document.getElementById('imagePreview');
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

@@ -1,0 +1,265 @@
+/* ===== BookStore - Custom Styles ===== */
+
+/* Font */
+body {
+    font-family: 'Inter', sans-serif;
+    color: #333;
+}
+
+/* Primary Navbar */
+.bg-primary-custom {
+    background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);
+}
+
+/* Hero Banner */
+.hero-banner {
+    background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #1565c0 100%);
+    padding: 80px 0;
+    min-height: 400px;
+}
+
+.min-vh-50 {
+    min-height: 50vh;
+}
+
+/* Book Cards */
+.book-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.book-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.book-img-wrapper {
+    height: 250px;
+    overflow: hidden;
+    background-color: #f8f9fa;
+    position: relative;
+}
+
+.book-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.book-card:hover .book-img {
+    transform: scale(1.05);
+}
+
+.book-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 0.2s;
+}
+
+.book-title:hover {
+    color: #1a237e !important;
+}
+
+/* Category Cards */
+.category-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+    background-color: #e8eaf6 !important;
+}
+
+/* Cart Badge */
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    font-size: 10px;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 5px;
+    border-radius: 50%;
+}
+
+/* Search Dropdown */
+.search-results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    z-index: 1050;
+    display: none;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.search-results-dropdown.show {
+    display: block;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+}
+
+.search-result-item:hover {
+    background-color: #f5f5f5;
+    color: #1a237e;
+}
+
+.search-result-item img {
+    width: 40px;
+    height: 55px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 12px;
+}
+
+/* Form Controls */
+.form-control:focus,
+.form-select:focus {
+    border-color: #3949ab;
+    box-shadow: 0 0 0 0.2rem rgba(57, 73, 171, 0.2);
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, #1a237e, #3949ab);
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0d1b69, #2c3b8e);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+}
+
+/* Cards */
+.card {
+    border-radius: 12px;
+}
+
+/* Table */
+.table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Pagination */
+.page-link {
+    color: #1a237e;
+    border-radius: 8px !important;
+    margin: 0 3px;
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, #1a237e, #3949ab);
+    border-color: #1a237e;
+}
+
+/* Footer */
+footer a:hover {
+    color: #90caf9 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-banner {
+        padding: 40px 0;
+    }
+
+    .hero-banner h1 {
+        font-size: 1.8rem;
+    }
+
+    .book-img-wrapper {
+        height: 180px;
+    }
+
+    .admin-sidebar {
+        width: 200px;
+    }
+
+    .admin-content {
+        margin-left: 200px;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-sidebar {
+        width: 100%;
+        min-height: auto;
+        position: relative;
+    }
+
+    .admin-content {
+        margin-left: 0;
+    }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+/* Alert auto-dismiss */
+.alert {
+    animation: fadeInUp 0.3s ease;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Book detail image */
+.book-detail-img-wrapper img {
+    transition: transform 0.3s;
+}
+
+.book-detail-img-wrapper img:hover {
+    transform: scale(1.02);
+}

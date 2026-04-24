@@ -1,0 +1,62 @@
+@model Order
+@{
+    ViewData["Title"] = "Đặt hàng thành công";
+}
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <div class="mb-4">
+            <i class="fas fa-check-circle fa-5x text-success"></i>
+        </div>
+        <h2 class="fw-bold text-success">Đặt hàng thành công!</h2>
+        <p class="text-muted">Mã đơn hàng: <strong>#@Model.Id</strong></p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Chi tiết đơn hàng</h5>
+                    <table class="table">
+                        <tr><td class="text-muted">Người nhận:</td><td class="fw-semibold">@Model.FullName</td></tr>
+                        <tr><td class="text-muted">Điện thoại:</td><td>@Model.Phone</td></tr>
+                        <tr><td class="text-muted">Địa chỉ:</td><td>@Model.Address</td></tr>
+                        @if (!string.IsNullOrEmpty(Model.Note))
+                        {
+                            <tr><td class="text-muted">Ghi chú:</td><td>@Model.Note</td></tr>
+                        }
+                        <tr><td class="text-muted">Trạng thái:</td><td><span class="badge bg-warning">@Model.Status</span></td></tr>
+                    </table>
+
+                    <h6 class="fw-bold mt-4 mb-3">Sản phẩm</h6>
+                    <table class="table">
+                        <thead class="table-light">
+                            <tr><th>Sách</th><th class="text-center">SL</th><th class="text-end">Thành tiền</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderDetails!)
+                            {
+                                <tr>
+                                    <td>@item.Book?.Title</td>
+                                    <td class="text-center">@item.Quantity</td>
+                                    <td class="text-end">@((item.Price * item.Quantity).ToString("N0"))₫</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold">
+                                <td colspan="2">Tổng cộng:</td>
+                                <td class="text-end text-danger h5">@Model.TotalPrice.ToString("N0")₫</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a asp-controller="Order" asp-action="History" class="btn btn-outline-primary me-2"><i class="fas fa-history me-1"></i>Lịch sử đơn hàng</a>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary"><i class="fas fa-home me-1"></i>Về trang chủ</a>
+            </div>
+        </div>
+    </div>
+</div>
