@@ -1,5 +1,6 @@
 using bookstore.Data;
 using bookstore.Models;
+using bookstore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,65 +12,21 @@ namespace bookstore.Controllers
     public class AdminPublisherController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAuditLogService _auditLog;
+        public AdminPublisherController(ApplicationDbContext context, IAuditLogService auditLog) { _context = context; _auditLog = auditLog; }
 
-        public AdminPublisherController(ApplicationDbContext context) { _context = context; }
+        [HttpGet("")] public async Task<IActionResult> Index() => View("~/Views/Admin/Publisher/Index.cshtml", await _context.Publishers.Include(p => p.Books).ToListAsync());
+        [HttpGet("Create")] public IActionResult Create() => View("~/Views/Admin/Publisher/Create.cshtml");
 
-        [HttpGet("")]
-        public async Task<IActionResult> Index()
-        {
-            var publishers = await _context.Publishers.Include(p => p.Books).ToListAsync();
-            return View("~/Views/Admin/Publisher/Index.cshtml", publishers);
-        }
+        [HttpPost("Create")] [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Publisher pub) { if (!ModelState.IsValid) return View("~/Views/Admin/Publisher/Create.cshtml", pub); _context.Publishers.Add(pub); await _context.SaveChangesAsync(); await _auditLog.LogAsync("Thêm NXB", "Publisher", pub.Id, pub.Name); TempData["Success"] = "Thêm NXB thành công!"; return RedirectToAction("Index"); }
 
-        [HttpGet("Create")]
-        public IActionResult Create() => View("~/Views/Admin/Publisher/Create.cshtml");
+        [HttpGet("Edit/{id}")] public async Task<IActionResult> Edit(int id) { var p = await _context.Publishers.FindAsync(id); if (p == null) return NotFound(); return View("~/Views/Admin/Publisher/Edit.cshtml", p); }
 
-        [HttpPost("Create")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Publisher publisher)
-        {
-            if (!ModelState.IsValid) return View("~/Views/Admin/Publisher/Create.cshtml", publisher);
-            _context.Publishers.Add(publisher);
-            await _context.SaveChangesAsync();
-            TempData["Success"] = "Thêm nhà xuất bản thành công!";
-            return RedirectToAction("Index");
-        }
+        [HttpPost("Edit/{id}")] [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Publisher pub) { if (id != pub.Id) return NotFound(); if (!ModelState.IsValid) return View("~/Views/Admin/Publisher/Edit.cshtml", pub); _context.Update(pub); await _context.SaveChangesAsync(); await _auditLog.LogAsync("Sửa NXB", "Publisher", id, pub.Name); TempData["Success"] = "Cập nhật thành công!"; return RedirectToAction("Index"); }
 
-        [HttpGet("Edit/{id}")]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var pub = await _context.Publishers.FindAsync(id);
-            if (pub == null) return NotFound();
-            return View("~/Views/Admin/Publisher/Edit.cshtml", pub);
-        }
-
-        [HttpPost("Edit/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Publisher publisher)
-        {
-            if (id != publisher.Id) return NotFound();
-            if (!ModelState.IsValid) return View("~/Views/Admin/Publisher/Edit.cshtml", publisher);
-            _context.Update(publisher);
-            await _context.SaveChangesAsync();
-            TempData["Success"] = "Cập nhật nhà xuất bản thành công!";
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost("Delete/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var pub = await _context.Publishers.Include(p => p.Books).FirstOrDefaultAsync(p => p.Id == id);
-            if (pub == null) return NotFound();
-            if (pub.Books != null && pub.Books.Any())
-            {
-                TempData["Error"] = "Không thể xóa NXB có sách!";
-                return RedirectToAction("Index");
-            }
-            _context.Publishers.Remove(pub);
-            await _context.SaveChangesAsync();
-            TempData["Success"] = "Xóa nhà xuất bản thành công!";
-            return RedirectToAction("Index");
-        }
+        [HttpPost("Delete/{id}")] [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id) { var p = await _context.Publishers.FindAsync(id); if (p == null) return NotFound(); p.IsDeleted = true; await _context.SaveChangesAsync(); await _auditLog.LogAsync("Xóa NXB", "Publisher", id, p.Name); TempData["Success"] = "Xóa thành công!"; return RedirectToAction("Index"); }
     }
 }

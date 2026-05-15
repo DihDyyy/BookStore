@@ -9,75 +9,30 @@ namespace bookstore.Controllers
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public HomeController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        public HomeController(ApplicationDbContext context) { _context = context; }
 
         public async Task<IActionResult> Index()
         {
-            // New books (8 latest)
-            var newBooks = await _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Category)
-                .OrderByDescending(b => b.CreatedAt)
-                .Take(8)
-                .ToListAsync();
+            var banners = await _context.Banners.Where(b => b.IsActive).OrderBy(b => b.DisplayOrder).ToListAsync();
+            var newBooks = await _context.Books.Include(b => b.Author).Include(b => b.Category).Include(b => b.Reviews).OrderByDescending(b => b.CreatedAt).Take(8).ToListAsync();
+            var featuredBooks = await _context.Books.Include(b => b.Author).Include(b => b.Category).Include(b => b.Reviews).Where(b => b.IsFeatured).Take(8).ToListAsync();
+            var flashSaleBooks = await _context.Books.Include(b => b.Author).Include(b => b.Category).Include(b => b.Reviews).Where(b => b.SalePrice.HasValue && b.SaleEndDate.HasValue && b.SaleEndDate > DateTime.Now).OrderBy(b => b.SaleEndDate).Take(8).ToListAsync();
 
-            // Best sellers - simplified query for SQL Server 2014 compatibility
-            var bestSellerIds = await _context.OrderDetails
-                .GroupBy(od => od.BookId)
-                .Select(g => new { BookId = g.Key, Total = g.Sum(od => od.Quantity) })
-                .OrderByDescending(x => x.Total)
-                .Take(8)
-                .Select(x => x.BookId)
-                .ToListAsync();
-
+            var bestSellerIds = await _context.OrderDetails.GroupBy(od => od.BookId).Select(g => new { BookId = g.Key, Total = g.Sum(od => od.Quantity) }).OrderByDescending(x => x.Total).Take(8).Select(x => x.BookId).ToListAsync();
             List<Book> bestSellers;
             if (bestSellerIds.Any())
-            {
-                bestSellers = await _context.Books
-                    .Include(b => b.Author)
-                    .Include(b => b.Category)
-                    .Where(b => bestSellerIds.Contains(b.Id))
-                    .ToListAsync();
-            }
+                bestSellers = await _context.Books.Include(b => b.Author).Include(b => b.Category).Include(b => b.Reviews).Where(b => bestSellerIds.Contains(b.Id)).ToListAsync();
             else
-            {
-                // No orders yet, show random books
-                bestSellers = await _context.Books
-                    .Include(b => b.Author)
-                    .Include(b => b.Category)
-                    .OrderBy(b => b.Id)
-                    .Take(8)
-                    .ToListAsync();
-            }
+                bestSellers = await _context.Books.Include(b => b.Author).Include(b => b.Category).Include(b => b.Reviews).OrderBy(b => b.Id).Take(8).ToListAsync();
 
-            // All categories
-            var categories = await _context.Categories
-                .Include(c => c.Books)
-                .ToListAsync();
+            var categories = await _context.Categories.Include(c => c.Books).OrderBy(c => c.DisplayOrder).ToListAsync();
 
-            var viewModel = new HomeViewModel
-            {
-                NewBooks = newBooks,
-                BestSellers = bestSellers,
-                Categories = categories
-            };
-
-            return View(viewModel);
+            return View(new HomeViewModel { Banners = banners, NewBooks = newBooks, BestSellers = bestSellers, FeaturedBooks = featuredBooks, FlashSaleBooks = flashSaleBooks, Categories = categories });
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+        public IActionResult Privacy() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View();
-        }
+        public IActionResult Error() => View();
     }
 }

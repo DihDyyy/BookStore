@@ -18,6 +18,17 @@ namespace bookstore.Models
         [Column(TypeName = "decimal(18,0)")]
         public decimal Price { get; set; }
 
+        [Display(Name = "Giá gốc (VNĐ)")]
+        [Column(TypeName = "decimal(18,0)")]
+        public decimal? OriginalPrice { get; set; }
+
+        [Display(Name = "Giá sale (VNĐ)")]
+        [Column(TypeName = "decimal(18,0)")]
+        public decimal? SalePrice { get; set; }
+
+        [Display(Name = "Ngày kết thúc sale")]
+        public DateTime? SaleEndDate { get; set; }
+
         [Display(Name = "Mô tả")]
         public string? Description { get; set; }
 
@@ -46,8 +57,31 @@ namespace bookstore.Models
         [Display(Name = "Số lượng tồn kho")]
         public int Stock { get; set; } = 0;
 
+        [Display(Name = "Sách nổi bật")]
+        public bool IsFeatured { get; set; } = false;
+
+        [Display(Name = "Đã xóa")]
+        public bool IsDeleted { get; set; } = false;
+
         [Display(Name = "Ngày thêm")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // Computed properties
+        [NotMapped]
+        public decimal EffectivePrice =>
+            SalePrice.HasValue && SaleEndDate.HasValue && SaleEndDate.Value > DateTime.Now
+                ? SalePrice.Value
+                : Price;
+
+        [NotMapped]
+        public bool IsOnSale =>
+            SalePrice.HasValue && SaleEndDate.HasValue && SaleEndDate.Value > DateTime.Now;
+
+        [NotMapped]
+        public int DiscountPercent =>
+            IsOnSale && Price > 0
+                ? (int)Math.Round((1 - SalePrice!.Value / Price) * 100)
+                : 0;
 
         // Navigation
         [ForeignKey("AuthorId")]
@@ -61,5 +95,6 @@ namespace bookstore.Models
 
         public ICollection<OrderDetail>? OrderDetails { get; set; }
         public ICollection<Wishlist>? Wishlists { get; set; }
+        public ICollection<Review>? Reviews { get; set; }
     }
 }

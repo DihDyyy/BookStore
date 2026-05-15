@@ -2,7 +2,6 @@ using bookstore.Data;
 using bookstore.Models;
 using bookstore.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace bookstore.Controllers
 {
@@ -10,14 +9,9 @@ namespace bookstore.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ICartService _cartService;
+        private readonly ICouponService _couponService;
+        public CartController(ApplicationDbContext context, ICartService cartService, ICouponService couponService) { _context = context; _cartService = cartService; _couponService = couponService; }
 
-        public CartController(ApplicationDbContext context, ICartService cartService)
-        {
-            _context = context;
-            _cartService = cartService;
-        }
-
-        // GET: /Cart
         public IActionResult Index()
         {
             var cart = _cartService.GetCart();
@@ -25,61 +19,45 @@ namespace bookstore.Controllers
             return View(cart);
         }
 
-        // POST: /Cart/Add
         [HttpPost]
-        public async Task<IActionResult> Add(int bookId, int quantity = 1)
+        public async Task<IActionResult> Add(int bookId, int quantity = 1, bool ajax = false)
         {
             var book = await _context.Books.FindAsync(bookId);
-            if (book == null)
-            {
-                TempData["Error"] = "Sách không tồn tại";
-                return RedirectToAction("Index", "Home");
-            }
-
-            if (quantity > book.Stock)
-            {
-                TempData["Error"] = "Số lượng vượt quá tồn kho";
-                return RedirectToAction("Details", "Book", new { id = bookId });
-            }
-
-            var cartItem = new CartItem
-            {
-                BookId = book.Id,
-                Title = book.Title,
-                Price = book.Price,
-                Image = book.Image,
-                Quantity = quantity
-            };
-
-            _cartService.AddToCart(cartItem);
+            if (book == null) { if (ajax) return Json(new { success = false, message = "Sách không tồn tại" }); TempData["Error"] = "Sách không tồn tại"; return RedirectToAction("Index", "Home"); }
+            if (quantity > book.Stock) { if (ajax) return Json(new { success = false, message = "Số lượng vượt quá tồn kho" }); TempData["Error"] = "Số lượng vượt quá tồn kho"; return RedirectToAction("Details", "Book", new { id = bookId }); }
+            _cartService.AddToCart(new CartItem { BookId = book.Id, Title = book.Title, Price = book.EffectivePrice, Image = book.Image, Quantity = quantity });
+            if (ajax) return Json(new { success = true, message = "Đã thêm vào giỏ hàng!", cartCount = _cartService.GetCartCount(), cartTotal = _cartService.GetCartTotal() });
             TempData["Success"] = "Đã thêm vào giỏ hàng!";
-
             return RedirectToAction("Index");
         }
 
-        // POST: /Cart/Update
         [HttpPost]
-        public IActionResult Update(int bookId, int quantity)
+        public IActionResult Update(int bookId, int quantity, bool ajax = false)
         {
             _cartService.UpdateQuantity(bookId, quantity);
+            if (ajax) { var cart = _cartService.GetCart(); var item = cart.FirstOrDefault(c => c.BookId == bookId); return Json(new { success = true, cartCount = _cartService.GetCartCount(), cartTotal = _cartService.GetCartTotal(), itemTotal = item?.Total ?? 0 }); }
             TempData["Success"] = "Đã cập nhật giỏ hàng!";
             return RedirectToAction("Index");
         }
 
-        // POST: /Cart/Remove
         [HttpPost]
-        public IActionResult Remove(int bookId)
+        public IActionResult Remove(int bookId, bool ajax = false)
         {
             _cartService.RemoveFromCart(bookId);
+            if (ajax) return Json(new { success = true, cartCount = _cartService.GetCartCount(), cartTotal = _cartService.GetCartTotal() });
             TempData["Success"] = "Đã xóa sách khỏi giỏ hàng!";
             return RedirectToAction("Index");
         }
 
-        // GET: /Cart/GetCount (AJAX)
-        [HttpGet]
-        public IActionResult GetCount()
+        [HttpPost]
+        public async Task<IActionResult> ApplyCoupon(string couponCode)
         {
-            return Json(new { count = _cartService.GetCartCount() });
+            var total = _cartService.GetCartTotal();
+            var (isValid, message, discount) = await _couponService.ValidateCoupon(couponCode, total);
+            return Json(new { success = isValid, message, discount, finalTotal = total - discount, couponCode = couponCode?.Trim().ToUpper() });
         }
+
+        [HttpGet]
+        public IActionResult GetCount() => Json(new { count = _cartService.GetCartCount() });
     }
 }

@@ -33,9 +33,38 @@ namespace bookstore.Models
         [Display(Name = "Tổng tiền")]
         public decimal TotalPrice { get; set; }
 
+        [Column(TypeName = "decimal(18,0)")]
+        [Display(Name = "Giảm giá")]
+        public decimal DiscountAmount { get; set; } = 0;
+
+        [StringLength(50)]
+        [Display(Name = "Mã coupon")]
+        public string? CouponCode { get; set; }
+
         [StringLength(30)]
         [Display(Name = "Trạng thái")]
         public string Status { get; set; } = "Chờ xử lý";
+        // "Chờ xử lý" → "Đang xử lý" → "Đang giao" → "Đã giao"
+        // "Đã hủy"
+
+        [StringLength(30)]
+        [Display(Name = "Phương thức thanh toán")]
+        public string PaymentMethod { get; set; } = "COD"; // "COD", "VNPay"
+
+        [StringLength(30)]
+        [Display(Name = "Trạng thái thanh toán")]
+        public string PaymentStatus { get; set; } = "Chưa thanh toán";
+        // "Chưa thanh toán", "Đã thanh toán", "Hoàn tiền"
+
+        [StringLength(100)]
+        [Display(Name = "Mã giao dịch")]
+        public string? TransactionId { get; set; }
+
+        [StringLength(500)]
+        [Display(Name = "Lý do hủy")]
+        public string? CancelReason { get; set; }
+
+        public DateTime? CancelledAt { get; set; }
 
         [Display(Name = "Ngày đặt")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;

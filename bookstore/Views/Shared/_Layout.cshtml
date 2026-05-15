@@ -4,69 +4,62 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - BookStore</title>
-    <meta name="description" content="Website bán sách trực tuyến - BookStore" />
+    <meta name="description" content="Website bán sách trực tuyến hàng đầu Việt Nam - BookStore" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom sticky-top shadow">
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="fas fa-book-open me-2"></i>BookStore
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand" href="/"><i class="fas fa-book-open me-2"></i>BookStore</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- Search -->
-                <div class="mx-auto position-relative" style="max-width: 400px; width: 100%;">
-                    <div class="input-group">
-                        <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm sách..." autocomplete="off" />
-                        <button class="btn btn-light" type="button" id="searchBtn">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
+                <div class="search-box mx-auto">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm sách, tác giả..." autocomplete="off" />
+                    <i class="fas fa-search search-icon"></i>
                     <div id="searchResults" class="search-results-dropdown"></div>
                 </div>
-
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index">
-                            <i class="fas fa-home me-1"></i>Trang chủ
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Book" asp-action="Index">
-                            <i class="fas fa-book me-1"></i>Sách
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index"><i class="fas fa-home me-1"></i>Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Book" asp-action="Index"><i class="fas fa-book me-1"></i>Sách</a></li>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Wishlist" asp-action="Index">
-                                <i class="fas fa-heart me-1"></i>Yêu thích
-                            </a>
-                        </li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Wishlist" asp-action="Index"><i class="fas fa-heart me-1"></i>Yêu thích</a></li>
                     }
                     <li class="nav-item">
                         <a class="nav-link position-relative" asp-controller="Cart" asp-action="Index">
                             <i class="fas fa-shopping-cart me-1"></i>Giỏ hàng
-                            <span id="cartBadge" class="badge bg-danger cart-badge">0</span>
+                            <span id="cartBadge" class="badge cart-badge" style="display:none">0</span>
                         </a>
                     </li>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle me-1"></i>@User.Identity.Name
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                                @{
+                                    var avatar = User.FindFirst("Avatar")?.Value;
+                                }
+                                @if (!string.IsNullOrEmpty(avatar))
+                                {
+                                    <img src="/images/avatars/@avatar" alt="avatar" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:6px;border:2px solid rgba(255,255,255,.5)" />
+                                }
+                                else
+                                {
+                                    <i class="fas fa-user-circle me-1" style="font-size:1.2rem"></i>
+                                }
+                                @User.Identity.Name
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" asp-controller="Order" asp-action="History"><i class="fas fa-history me-2"></i>Lịch sử đơn hàng</a></li>
+                                <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile"><i class="fas fa-user me-2"></i>Tài khoản</a></li>
+                                <li><a class="dropdown-item" asp-controller="Order" asp-action="History"><i class="fas fa-history me-2"></i>Đơn hàng</a></li>
+                                <li><a class="dropdown-item" asp-controller="Account" asp-action="Addresses"><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ</a></li>
                                 @if (User.IsInRole("Admin"))
                                 {
+                                    <li><hr class="dropdown-divider" /></li>
                                     <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index"><i class="fas fa-cog me-2"></i>Quản trị</a></li>
                                 }
                                 <li><hr class="dropdown-divider" /></li>
@@ -81,78 +74,43 @@
                     }
                     else
                     {
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Account" asp-action="Login">
-                                <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-outline-light btn-sm ms-2" asp-controller="Account" asp-action="Register">
-                                Đăng ký
-                            </a>
-                        </li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login"><i class="fas fa-sign-in-alt me-1"></i>Đăng nhập</a></li>
+                        <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" asp-controller="Account" asp-action="Register" style="border-radius:50px;padding:5px 16px">Đăng ký</a></li>
                     }
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Toast Messages -->
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show m-0 rounded-0 text-center" role="alert">
-            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="alert alert-success d-none">@TempData["Success"]</div>
     }
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show m-0 rounded-0 text-center" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="alert alert-danger d-none">@TempData["Error"]</div>
     }
 
-    <!-- Main Content -->
-    <main>
-        @RenderBody()
-    </main>
+    <main>@RenderBody()</main>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white pt-5 pb-3 mt-5">
+    <footer class="footer-custom">
         <div class="container">
             <div class="row g-4">
                 <div class="col-lg-4">
-                    <h5 class="fw-bold mb-3"><i class="fas fa-book-open me-2"></i>BookStore</h5>
-                    <p class="text-white-50">Website bán sách trực tuyến hàng đầu Việt Nam. Cung cấp đa dạng các thể loại sách từ trong nước và quốc tế.</p>
+                    <h5><i class="fas fa-book-open me-2"></i>BookStore</h5>
+                    <p style="color:rgba(255,255,255,.6)">Website bán sách trực tuyến hàng đầu Việt Nam. Cung cấp đa dạng các thể loại sách với giá ưu đãi nhất.</p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center"><i class="fab fa-instagram"></i></a>
+                        <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center"><i class="fab fa-youtube"></i></a>
+                    </div>
                 </div>
-                <div class="col-lg-3">
-                    <h6 class="fw-bold mb-3">Liên kết nhanh</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="/" class="text-white-50 text-decoration-none"><i class="fas fa-angle-right me-2"></i>Trang chủ</a></li>
-                        <li class="mb-2"><a asp-controller="Book" asp-action="Index" class="text-white-50 text-decoration-none"><i class="fas fa-angle-right me-2"></i>Sách</a></li>
-                        <li class="mb-2"><a asp-controller="Cart" asp-action="Index" class="text-white-50 text-decoration-none"><i class="fas fa-angle-right me-2"></i>Giỏ hàng</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-2">
-                    <h6 class="fw-bold mb-3">Danh mục</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Văn học</a></li>
-                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Kinh tế</a></li>
-                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Khoa học</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-3">
-                    <h6 class="fw-bold mb-3">Liên hệ</h6>
-                    <ul class="list-unstyled text-white-50">
-                        <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>TP. Hồ Chí Minh, Việt Nam</li>
-                        <li class="mb-2"><i class="fas fa-phone me-2"></i>0123 456 789</li>
-                        <li class="mb-2"><i class="fas fa-envelope me-2"></i>info&#64;bookstore.com</li>
-                    </ul>
-                </div>
+                <div class="col-lg-2"><h6>Liên kết</h6><ul class="list-unstyled"><li class="mb-2"><a href="/"><i class="fas fa-angle-right me-2"></i>Trang chủ</a></li><li class="mb-2"><a asp-controller="Book" asp-action="Index"><i class="fas fa-angle-right me-2"></i>Sách</a></li><li class="mb-2"><a asp-controller="Cart" asp-action="Index"><i class="fas fa-angle-right me-2"></i>Giỏ hàng</a></li></ul></div>
+                <div class="col-lg-3"><h6>Hỗ trợ</h6><ul class="list-unstyled"><li class="mb-2"><a href="#"><i class="fas fa-angle-right me-2"></i>Chính sách đổi trả</a></li><li class="mb-2"><a href="#"><i class="fas fa-angle-right me-2"></i>Vận chuyển</a></li><li class="mb-2"><a href="#"><i class="fas fa-angle-right me-2"></i>Thanh toán</a></li></ul></div>
+                <div class="col-lg-3"><h6>Liên hệ</h6><ul class="list-unstyled" style="color:rgba(255,255,255,.6)"><li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>TP. Hồ Chí Minh, Việt Nam</li><li class="mb-2"><i class="fas fa-phone me-2"></i>0123 456 789</li><li class="mb-2"><i class="fas fa-envelope me-2"></i>info&#64;bookstore.com</li></ul></div>
             </div>
-            <hr class="mt-4 mb-3 border-secondary" />
-            <p class="text-center text-white-50 mb-0">&copy; 2024 BookStore. All rights reserved.</p>
+            <hr style="border-color:rgba(255,255,255,.1);margin:2rem 0 1rem" />
+            <p class="text-center mb-0" style="color:rgba(255,255,255,.4)">&copy; 2026 BookStore. All rights reserved.</p>
         </div>
     </footer>
 

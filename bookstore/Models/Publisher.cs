@@ -11,6 +11,8 @@ namespace bookstore.Models
         [Display(Name = "Tên nhà xuất bản")]
         public string Name { get; set; } = string.Empty;
 
+        public bool IsDeleted { get; set; } = false;
+
         // Navigation
         public ICollection<Book>? Books { get; set; }
     }

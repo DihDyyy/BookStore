@@ -15,6 +15,8 @@ namespace bookstore.Models
         [Display(Name = "Tiểu sử")]
         public string? Bio { get; set; }
 
+        public bool IsDeleted { get; set; } = false;
+
         // Navigation
         public ICollection<Book>? Books { get; set; }
     }

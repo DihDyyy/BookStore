@@ -1,92 +1,103 @@
-@model HomeViewModel
-@{
-    ViewData["Title"] = "Trang chủ";
-}
+@model bookstore.Models.ViewModels.HomeViewModel
+@{ ViewData["Title"] = "Trang chủ"; }
 
-<!-- Banner -->
-<section class="hero-banner">
-    <div class="container">
-        <div class="row align-items-center min-vh-50">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold text-white mb-3">Khám Phá Thế Giới<br /><span class="text-warning">Qua Từng Trang Sách</span></h1>
-                <p class="lead text-white-50 mb-4">Hàng ngàn đầu sách từ nhiều thể loại đang chờ bạn khám phá. Mua sách online dễ dàng, giao hàng nhanh chóng.</p>
-                <a asp-controller="Book" asp-action="Index" class="btn btn-warning btn-lg px-4 me-2">
-                    <i class="fas fa-book-reader me-2"></i>Khám phá ngay
+<!-- Banner Slider -->
+<div class="hero-banner">
+    @foreach (var banner in Model.Banners)
+    {
+        <div class="banner-slide">
+            <div class="banner-content">
+                <h1>@banner.Title</h1>
+                <p>@banner.Subtitle</p>
+                <a href="@(banner.LinkUrl ?? "/Book")" class="btn btn-light btn-lg" style="border-radius:50px;font-weight:600;padding:10px 30px">
+                    Khám phá ngay <i class="fas fa-arrow-right ms-2"></i>
                 </a>
             </div>
-            <div class="col-lg-6 text-center">
-                <i class="fas fa-books" style="font-size: 200px; color: rgba(255,255,255,0.1);"></i>
+        </div>
+    }
+    @if (Model.Banners.Count > 1)
+    {
+        <div class="banner-dots">
+            @for (int i = 0; i < Model.Banners.Count; i++)
+            {
+                <div class="banner-dot @(i == 0 ? "active" : "")"></div>
+            }
+        </div>
+    }
+</div>
+
+<div class="container py-5">
+    <!-- Flash Sale -->
+    @if (Model.FlashSaleBooks.Any())
+    {
+        <div class="flash-sale-section fade-up">
+            <div class="section-header">
+                <h2><i class="fas fa-bolt me-2" style="color:var(--danger)"></i>Flash Sale</h2>
+            </div>
+            @{
+                var saleEnd = Model.FlashSaleBooks.Min(b => b.SaleEndDate);
+            }
+            <div class="countdown" data-countdown="@saleEnd?.ToString("yyyy-MM-ddTHH:mm:ss")"></div>
+            <div class="row g-3">
+                @foreach (var book in Model.FlashSaleBooks.Take(4))
+                {
+                    <div class="col-6 col-md-3">@await Html.PartialAsync("_BookCard", book)</div>
+                }
             </div>
         </div>
-    </div>
-</section>
+    }
 
-<!-- Categories -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold">Danh Mục Sách</h2>
-            <p class="text-muted">Khám phá sách theo thể loại yêu thích</p>
-        </div>
+    <!-- Categories -->
+    <section class="my-5 fade-up">
+        <div class="section-header"><h2>Danh mục sách</h2><p>Khám phá kho sách đa dạng theo thể loại</p></div>
         <div class="row g-3">
             @foreach (var cat in Model.Categories)
             {
-                <div class="col-6 col-md-3">
-                    <a asp-controller="Book" asp-action="Index" asp-route-categoryId="@cat.Id" class="text-decoration-none">
-                        <div class="card category-card border-0 shadow-sm h-100 text-center p-4">
-                            <i class="fas fa-book-open fa-2x text-primary mb-3"></i>
-                            <h6 class="fw-bold mb-1">@cat.Name</h6>
-                            <small class="text-muted">@(cat.Books?.Count ?? 0) sách</small>
-                        </div>
+                <div class="col-6 col-md-3 col-lg">
+                    <a href="/Book?categoryId=@cat.Id" class="category-card d-block">
+                        <div class="icon"><i class="fas @(cat.Icon ?? "fa-book")"></i></div>
+                        <h6>@cat.Name</h6>
+                        <small>@(cat.Books?.Count ?? 0) sách</small>
                     </a>
                 </div>
             }
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- New Books -->
-<section class="py-5">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="fw-bold mb-0">Sách Mới</h2>
-                <p class="text-muted mb-0">Những đầu sách mới nhất</p>
+    <!-- Featured Books -->
+    @if (Model.FeaturedBooks.Any())
+    {
+        <section class="my-5 fade-up">
+            <div class="section-header"><h2>Sách nổi bật</h2><p>Được yêu thích nhất bởi độc giả</p></div>
+            <div class="row g-3">
+                @foreach (var book in Model.FeaturedBooks.Take(4))
+                {
+                    <div class="col-6 col-md-3">@await Html.PartialAsync("_BookCard", book)</div>
+                }
             </div>
-            <a asp-controller="Book" asp-action="Index" asp-route-sortBy="newest" class="btn btn-outline-primary">
-                Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
-            </a>
-        </div>
-        <div class="row g-4">
-            @foreach (var book in Model.NewBooks)
+        </section>
+    }
+
+    <!-- New Books -->
+    <section class="my-5 fade-up">
+        <div class="section-header"><h2>Sách mới nhất</h2><p>Cập nhật mỗi ngày</p></div>
+        <div class="row g-3">
+            @foreach (var book in Model.NewBooks.Take(8))
             {
-                <div class="col-6 col-md-4 col-lg-3">
-                    <partial name="_BookCard" model="book" />
-                </div>
+                <div class="col-6 col-md-3">@await Html.PartialAsync("_BookCard", book)</div>
             }
         </div>
-    </div>
-</section>
+        <div class="text-center mt-4"><a href="/Book?sortBy=newest" class="btn btn-outline-custom">Xem tất cả <i class="fas fa-arrow-right ms-1"></i></a></div>
+    </section>
 
-<!-- Best Sellers -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="fw-bold mb-0"><i class="fas fa-fire text-danger me-2"></i>Sách Bán Chạy</h2>
-                <p class="text-muted mb-0">Được yêu thích nhất</p>
-            </div>
-            <a asp-controller="Book" asp-action="Index" class="btn btn-outline-primary">
-                Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
-            </a>
-        </div>
-        <div class="row g-4">
-            @foreach (var book in Model.BestSellers)
+    <!-- Best Sellers -->
+    <section class="my-5 fade-up">
+        <div class="section-header"><h2>Sách bán chạy</h2><p>Top sách được mua nhiều nhất</p></div>
+        <div class="row g-3">
+            @foreach (var book in Model.BestSellers.Take(8))
             {
-                <div class="col-6 col-md-4 col-lg-3">
-                    <partial name="_BookCard" model="book" />
-                </div>
+                <div class="col-6 col-md-3">@await Html.PartialAsync("_BookCard", book)</div>
             }
         </div>
-    </div>
-</section>
+    </section>
+</div>

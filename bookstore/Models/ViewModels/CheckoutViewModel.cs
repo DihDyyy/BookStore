@@ -23,7 +23,18 @@ namespace bookstore.Models.ViewModels
         [Display(Name = "Ghi chú")]
         public string? Note { get; set; }
 
+        [Display(Name = "Phương thức thanh toán")]
+        public string PaymentMethod { get; set; } = "COD";
+
+        public string? CouponCode { get; set; }
+        public decimal DiscountAmount { get; set; } = 0;
+
+        public int? SelectedAddressId { get; set; }
+
         public List<CartItem> CartItems { get; set; } = new();
         public decimal TotalPrice { get; set; }
+        public decimal FinalPrice => TotalPrice - DiscountAmount;
+
+        public List<UserAddress> SavedAddresses { get; set; } = new();
     }
 }
